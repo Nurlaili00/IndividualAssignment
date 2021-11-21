@@ -1,0 +1,72 @@
+//SERVER SIDE
+#include<stdio.h>
+#include<string.h> //strlen
+#include<sys/socket.h>
+#include<arpa/inet.h>	//inet_addr
+#include<unistd.h> //write //accept client connection
+
+int main(int argc , char *argv[])
+{
+	int sockDesc , newsocket , c;
+	struct sockaddr_in server , client;
+    char *message; //accept
+	
+	//Create socket
+	sockDesc = socket(AF_INET , SOCK_STREAM , 0);
+	if (sockDesc == -1)
+	{
+		
+		printf("[X] Could not create socket");
+		
+	}
+	
+	puts("[X] Socket successfully created...");
+	
+	//Prepare the sockaddr_in structure
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_port = htons( 42 );
+	
+	//Bind
+	if( bind(sockDesc,(struct sockaddr *)&server , sizeof(server)) < 0)
+	{
+		
+		puts("[X] Bind failed");
+		
+	}
+	
+	puts("[X] Socket successfully binded...");
+	
+	//Listen
+	listen(sockDesc , 3);
+	puts("[X] ARPA Host Name Server Protocol listening...\n");
+	puts("[X] ARPA Host Name Server Protocol Server :)");
+	
+
+    //Accept and incoming connection
+	puts("\n[X] Waiting for incoming connections...\n");
+	c = sizeof(struct sockaddr_in);
+	while( (newsocket = accept(sockDesc, (struct sockaddr *)&client, (socklen_t*)&c)) )
+	{
+		
+		puts("[X] Connection accepted");
+		
+		//Reply to the client (send)
+		message = "\nFrom Server -> Hello Client, I have done resolved Facebook hostname as you wish and send an ip address to you\n";
+		write(newsocket , message , strlen(message));
+		
+	}
+	
+	if (newsocket<0)
+	{
+		
+		perror("[X] Accept failed");
+		return 1;
+		
+	}
+
+	return 0;
+	
+	//Close the socket
+    close(sockDesc);
+}
